@@ -18,6 +18,6 @@ go clean -modcache
 
 # organ system
 ```bash
-./scripts/build_organsys.sh 
-./build/organsys
+./scripts/build_organsys.sh
+./build/organsys -conf ./configs/organsys_config/organ_config01.json
 ```

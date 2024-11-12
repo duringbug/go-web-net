@@ -60,6 +60,16 @@ func handleUDPMessage(conn *net.UDPConn) {
 }
 
 func main() {
+	// 打开日志文件
+	logFile, err := os.OpenFile("log/cells.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Printf("无法打开日志文件: %v\n", err)
+		return
+	}
+	defer logFile.Close()
+
+	// 设置日志输出到文件
+	log.SetOutput(logFile)
 	// 定义命令行参数
 	configPath := flag.String("conf", "configs/config.json", "配置文件路径")
 	flag.Parse()

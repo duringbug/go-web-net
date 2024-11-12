@@ -1,0 +1,13 @@
+{
+    "commands": [
+      {
+        "command": "./build/cell",
+        "args": ["-conf", "./configs/cells_config/cell_config01.json"]
+      },
+      {
+        "command": "./build/cell",
+        "args": ["-conf", "./configs/cells_config/cell_config02.json"]
+      }
+    ]
+}
+  

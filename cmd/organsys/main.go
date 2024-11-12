@@ -1,53 +1,82 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	"encoding/json"
+	"flag"
+	"go-web-net/internal/logger" // 导入自定义的日志包
 	"os"
 	"os/exec"
 	"sync"
 )
 
-// 执行命令的函数
-func runCommand(command string, args []string, wg *sync.WaitGroup) {
-	// 结束时通知 WaitGroup
-	defer wg.Done()
-
-	// 准备命令
-	cmd := exec.Command(command, args...)
-
-	// 设置命令的输出
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	// 执行命令
-	err := cmd.Run()
-	if err != nil {
-		log.Printf("命令执行失败: %v", err)
-	}
+type Command struct {
+	Command string   `json:"command"`
+	Args    []string `json:"args"`
 }
 
-// main 函数，启动并行命令
+type Config struct {
+	Commands []Command `json:"commands"`
+}
+
+// loadConfig 从 JSON 文件加载配置
+func loadConfig(filePath string) (*Config, error) {
+	configFile, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer configFile.Close()
+
+	var config Config
+	decoder := json.NewDecoder(configFile)
+	err = decoder.Decode(&config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &config, nil
+}
+
 func main() {
+	// 创建 logger 实例
+	logFilePath := "log/organsys.log"
+	log, err := logger.NewLogger(logFilePath)
+	if err != nil {
+		log.Error("无法创建日志文件: ", err)
+		return
+	}
+	defer log.Close()
+
+	// 定义命令行参数 -conf，用于指定配置文件路径
+	confPath := flag.String("conf", "configs/organsys_config/organ_config01.json", "配置文件的路径")
+	flag.Parse() // 解析命令行参数
+
+	// 加载配置文件
+	config, err := loadConfig(*confPath)
+	if err != nil {
+		log.Error("加载配置失败: ", err)
+		return
+	}
+
 	var wg sync.WaitGroup
 
-	// 需要执行的命令
-	commands := []struct {
-		command string
-		args    []string
-	}{
-		{"./build/cell", []string{"-conf", "./configs/cells_config/cell_config01.json"}},
-		{"./build/cell", []string{"-conf", "./configs/cells_config/cell_config02.json"}},
+	// 遍历并并行执行每个命令
+	for _, cmd := range config.Commands {
+		wg.Add(1) // 增加 WaitGroup 计数器
+		go func(cmd Command) {
+			defer wg.Done() // 命令执行完成后减小计数器
+			log.Info("执行命令: ", cmd.Command, cmd.Args)
+
+			// 使用 os/exec 包执行命令
+			execCmd := exec.Command(cmd.Command, cmd.Args...)
+			output, err := execCmd.CombinedOutput()
+			if err != nil {
+				log.Error("命令执行失败: ", err, " 命令: ", cmd.Command, cmd.Args)
+			} else {
+				log.Info("命令输出:\n", string(output))
+			}
+		}(cmd) // 这里传递 cmd 作为参数
 	}
 
-	// 启动并行任务
-	for _, cmd := range commands {
-		wg.Add(1)                                 // 每个命令都需要通知 WaitGroup
-		go runCommand(cmd.command, cmd.args, &wg) // 使用 goroutine 执行命令
-	}
-
-	// 等待所有命令执行完毕
+	// 等待所有 Goroutine 执行完成
 	wg.Wait()
-
-	fmt.Println("所有命令执行完毕")
 }
