@@ -1,9 +1,11 @@
 package logger
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
+	"runtime"
 )
 
 type Logger struct {
@@ -41,15 +43,21 @@ func (l *Logger) Close() {
 
 // Info 打印信息日志
 func (l *Logger) Info(v ...interface{}) {
-	l.infoLogger.Println(v...)
+	_, file, line, _ := runtime.Caller(1)                        // 获取文件名和行号
+	logMessage := append(v, fmt.Sprintf(" [%s:%d]", file, line)) // 格式化为字符串
+	l.infoLogger.Println(logMessage...)
 }
 
 // Warn 打印警告日志
 func (l *Logger) Warn(v ...interface{}) {
-	l.warnLogger.Println(v...)
+	_, file, line, _ := runtime.Caller(1)
+	logMessage := append(v, fmt.Sprintf(" [%s:%d]", file, line))
+	l.warnLogger.Println(logMessage...)
 }
 
 // Error 打印错误日志
 func (l *Logger) Error(v ...interface{}) {
-	l.errorLogger.Println(v...)
+	_, file, line, _ := runtime.Caller(1)
+	logMessage := append(v, fmt.Sprintf(" [%s:%d]", file, line))
+	l.errorLogger.Println(logMessage...)
 }

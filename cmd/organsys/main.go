@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"go-web-net/internal/logger" // 导入自定义的日志包
 	"os"
 	"os/exec"
 	"sync"
+
+	"github.com/duringbug/go-web-net/pkg/logger" // 导入自定义的日志包
 )
 
 type Command struct {
