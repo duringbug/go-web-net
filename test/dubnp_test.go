@@ -153,7 +153,9 @@ func TestAddRandomMatrices(t *testing.T) {
 	// fmt.Println("Matrix B first 5 elements:", dataB[:5])
 	// fmt.Println("Result first 5 elements:", result.Data[:5])
 	// 断言矩阵加法结果的形状与输入矩阵相同
-	dubug.assert.Equal(t, a.Shape, result.Shape, "结果矩阵的形状应该与输入矩阵一致")
+	if !dubug.Equal(a.Shape, result.Shape) {
+		t.Fatalf("矩阵形状不匹配: got %v, want %v", result.Shape, a.Shape)
+	}
 }
 
 // 测试矩阵相乘
@@ -201,7 +203,9 @@ func TestMultiplyRandomMatrices(t *testing.T) {
 	// fmt.Println("Matrix B first 5 elements:", dataB[:5])
 	// fmt.Println("Result first 5 elements:", result.Data[:5])
 	// 断言矩阵加法结果的形状与输入矩阵相同
-	dubug.assert.Equal(t, a.Shape, result.Shape, "结果矩阵的形状应该与输入矩阵一致")
+	if !dubug.Equal(a.Shape, result.Shape) {
+		t.Fatalf("矩阵形状不匹配: got %v, want %v", result.Shape, a.Shape)
+	}
 
 }
 
@@ -243,6 +247,8 @@ func TestTransposeRandomMatrices(t *testing.T) {
 	// fmt.Println("Matrix A first 5 elements:", dataA[:5])
 	// fmt.Println("Result first 5 elements:", result.Data[:5])
 	// 断言矩阵加法结果的形状与输入矩阵相同
-	dubug.assert.Equal(t, a.Shape, result.Shape, "结果矩阵的形状应该与输入矩阵一致")
+	if !dubug.Equal(a.Shape, result.Shape) {
+		t.Fatalf("矩阵形状不匹配: got %v, want %v", result.Shape, a.Shape)
+	}
 
 }
